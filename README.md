@@ -44,31 +44,47 @@ Make sure you add a `.gitignore` to prevent leaking your auth tokens!
 - Any `__pycache__` directories
 - Any local article drafts (`*.md` / `*.html` and output `*.png` screenshots) you don't want public yet.
 
-### 1. Generating Auth State (First Time Only)
-Medium is protected by Cloudflare Turnstile. We must generate a valid session state using a headed browser first.
+## Usage: End-to-End Onboarding
 
-Run the login script locally to bypass the bot-check and log in:
+### 1. First-Time Setup (Once per machine)
+
+First, install the dependencies required for the initial login:
+```bash
+# Install Playwright and its browser binaries
+uv sync
+uv run playwright install chromium
+```
+
+Next, you must generate your Medium Auth Token file so the bot can act as you. We do this by launching a visible browser so you can solve any Cloudflare Turnstile checks or input your 2FA codes.
 ```bash
 uv run python login.py
 ```
-After successfully logging in, it saves your cookies and auth keys into `medium_state.json`. Do not commit this file.
+*A browser window will open. Log into Medium normally. Once you are fully logged in and see the homepage, close the window. The script will save your session to `medium_state.json`. You never have to do this again unless your session expires.*
 
-### 2. Creating a Draft (Docker/Headless)
-For daily usage, the easiest way is checking your markdown document with the included bash wrapper. This builds and runs a lightweight headless Docker container.
+---
 
+### 2. The Daily Workflow (Every time you write a post)
+
+Now that you are authenticated, you are ready to use the bot every day!
+
+**Step A: Write Your Article**
+Create a new file (e.g., `my_cool_article.md` or `.html`). Write your article using standard Markdown or HTML.
+
+**Step B: Run the Bot**
+Whenever you are finished writing and want to send it to Medium, simply run the bash script!
 ```bash
-./draft.sh your_awesome_article.md
+./draft.sh my_cool_article.md
 ```
-*Note: You can pass absolute paths! E.g. `./draft.sh /home/user/Documents/blog_post.md`*
+*Note: This script automatically uses Docker (Playwright official image) to execute the Python logic safely without touching your host system, other than reading your article and state file.*
 
-If successful, the output will give you the direct URL to your saved draft! (`https://medium.com/p/.../edit`)
+**Step C: Final Review**
+The script will print the success URL (e.g., `https://medium.com/p/12345/edit`). Click the link to review your perfectly formatted draft in the Medium editor, add your 5 Medium tags, and hit the green **Publish** button!
 
-### 3. Seeing the Execution (Headed UI Mode)
-If you want to watch the bot type and inject the HTML in real-time, you must run it locally on your machine rather than inside Docker. We've added a `--headed` flag specifically for this:
+---
 
-1. Sync local dependencies: `uv sync`
-2. Install Chromium binaries for Playwright: `uv run playwright install chromium`
-3. Run the draft script with the headed flag:
+### 3. Optional: Seeing the Execution (Headed UI Mode)
+If you want to watch the bot type and inject the HTML in real-time, you must run it locally on your python environment rather than inside Docker. We've added a `--headed` flag specifically for this:
+
 ```bash
 uv run python draft.py your_awesome_article.md --headed
 ```
