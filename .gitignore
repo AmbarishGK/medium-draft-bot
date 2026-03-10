@@ -1,0 +1,11 @@
+medium_state.json
+.venv
+__pycache__
+
+# Screenshots & Drafts
+*.png
+*.jpg
+*.md
+*.html
+!README.md
+!test.md
